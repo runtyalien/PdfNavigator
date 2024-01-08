@@ -4,6 +4,7 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { Document, RecursiveCharacterTextSplitter } from "@pinecone-database/doc-splitter"
 import { getEmbeddings } from "./embeddings";
 import md5 from "md5"
+import { convertToAscii } from "./utils";
 
 export const getPineconeClient = () => {
   return new Pinecone({
@@ -34,6 +35,19 @@ export async function loadS3IntoPinecone(filekey: string) {
   const documents = await Promise.all(pages.map(prepareDocument))
 
   //3. Vectorising and embedding individual documents
+  const vectors = await Promise.all(documents.flat().map(embedDocument))
+
+  //4. Upload to pinecone
+  const client =  getPineconeClient();
+  const pineconeIndex = await client.index('pdfnavigator')
+
+  console.log('inserting vectors into pinecone');
+  const namespace = pineconeIndex.namespace(convertToAscii(filekey));
+
+  await namespace.upsert(vectors);
+
+  return documents[0];
+  
 }
 
 async function embedDocument(doc:Document){
@@ -47,8 +61,8 @@ async function embedDocument(doc:Document){
       metadata: {
         text: doc.metadata.text,
         pageNumber: doc.metadata.pageNumber,
-      }
-    }
+      },
+    } as PineconeRecord
   } catch (error) {
     console.log('error embedding document', error);
     throw error
