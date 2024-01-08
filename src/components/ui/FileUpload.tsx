@@ -9,7 +9,8 @@ import toast from "react-hot-toast";
 
 const FileUpload = () => {
   const [uploading, setUploading] = React.useState(false);
-  const  {mutate, isPending}  = useMutation({/*use isPending instead of isLoading */
+  const { mutate, isPending } = useMutation({
+    /*use isPending instead of isPending */
     mutationFn: async ({
       file_key,
       file_name,
@@ -37,25 +38,25 @@ const FileUpload = () => {
       }
 
       try {
-        setUploading(true)
+        setUploading(true);
         const data = await uploadToS3(file);
-        if(!data?.file_key || !data.file_name){
-          toast.error("Something went wrong")
+        if (!data?.file_key || !data.file_name) {
+          toast.error("Something went wrong");
           return;
         }
         mutate(data, {
-          onSuccess:(data) => {
+          onSuccess: (data) => {
             console.log(data);
+            //toast.success(data.message);
           },
-          onError:(err) => {
-            toast.error("Error creating chat")
-            console.log(err);
-          }
-        })
+          onError: (err) => {
+            toast.error("Error creating chat");
+          },
+        });
       } catch (error) {
         console.log(error);
-      } finally{
-        setUploading(false)
+      } finally {
+        setUploading(false);
       }
     },
   });
@@ -69,18 +70,17 @@ const FileUpload = () => {
         })}
       >
         <input {...getInputProps()} />
-        {(uploading || isPending) ? (
+        {uploading || isPending ? (
           <>
-          <Loader2 className="h-10 w-10 text-blue-500 animate-spin"/>
-          <p className="mt-2 text-sm text-slate-400">Spilling Tea to GPT</p>
+            <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+            <p className="mt-2 text-sm text-slate-400">Spilling Tea to GPT</p>
           </>
         ) : (
           <>
-          <Inbox className="w-10 h-10 text-blue-500" />
-          <p className="mt-2 text-sm text-slate-400">Drop PDF here</p>
-        </>
+            <Inbox className="w-10 h-10 text-blue-500" />
+            <p className="mt-2 text-sm text-slate-400">Drop PDF here</p>
+          </>
         )}
-        
       </div>
     </div>
   );
