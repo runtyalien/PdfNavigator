@@ -50,24 +50,45 @@ export async function loadS3IntoPinecone(filekey: string) {
   
 }
 
-async function embedDocument(doc:Document){
+//IF USING OPENAI USE THIS FUNCTION
+// async function embedDocument(doc:Document){
+//   try {
+//     const embeddings = await getEmbeddings(doc.pageContent)
+//     const hash = md5(doc.pageContent)
+
+//     return {
+//       id: hash,
+//       values: embeddings,
+//       metadata: {
+//         text: doc.metadata.text,
+//         pageNumber: doc.metadata.pageNumber,
+//       },
+//     } as PineconeRecord
+//   } catch (error) {
+//     console.log('error embedding document', error);
+//     throw error
+//   }
+// }
+
+async function embedDocument(doc: Document): Promise<PineconeRecord> {
   try {
-    const embeddings = await getEmbeddings(doc.pageContent)
-    const hash = md5(doc.pageContent)
+    const embeddings = await getEmbeddings(doc.pageContent);
+    const hash = md5(doc.pageContent);
 
     return {
-      id:hash,
-      values:embeddings,
+      id: hash,
+      values: embeddings,
       metadata: {
         text: doc.metadata.text,
         pageNumber: doc.metadata.pageNumber,
       },
-    } as PineconeRecord
+    } as PineconeRecord;
   } catch (error) {
     console.log('error embedding document', error);
-    throw error
+    throw error;
   }
 }
+
 
 export const truncateStringByBytes = (str: string, bytes: number) => {
   const enc = new TextEncoder();
